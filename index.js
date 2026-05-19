@@ -150,7 +150,7 @@ async function run() {
     });
 
     // for booking collection API
-    app.post("/booking", async (req, res) => {
+    app.post("/booking", verifyToken, async (req, res) => {
       try {
         const bookingData = req.body;
 
