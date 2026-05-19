@@ -79,7 +79,7 @@ async function run() {
     });
 
     // POST API
-    app.post("/destination", async (req, res) => {
+    app.post("/destination", verifyToken, async (req, res) => {
       const destination = req.body;
 
       console.log(destination);
@@ -112,7 +112,7 @@ async function run() {
     );
 
     // edit description related API
-    app.patch("/destination/:id", verifyToken ,async (req, res) => {
+    app.patch("/destination/:id", verifyToken, async (req, res) => {
       const { id } = req.params;
       const updatedData = req.body;
 
@@ -124,7 +124,7 @@ async function run() {
     });
 
     // for DELETE API
-    app.delete("/destination/:id", async (req, res) => {
+    app.delete("/destination/:id", verifyToken, async (req, res) => {
       const { id } = req.params;
       const result = await destinationCollection.deleteOne({
         _id: new ObjectId(id),
