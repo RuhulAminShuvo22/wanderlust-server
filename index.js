@@ -9,6 +9,7 @@ dotenv.config();
 const express = require("express");
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 
 const uri = process.env.MONGODB_URI;
 
@@ -28,30 +29,38 @@ const client = new MongoClient(uri, {
   },
 });
 
+const JWKS = createRemoteJWKSet(
+  new URL("http://localhost:3000/api/auth/jwks")
+)
 
-const verifyToken = (req, res, next) => {
-        
-  const authHeader = req?.headers.authorization
-  if(!authHeader){
+const verifyToken = async (req, res, next) => {
+  const authHeader = req?.headers.authorization;
+  if (!authHeader) {
     return res.status(401).json({
-      message : "Unauthorized"
+      message: "Unauthorized",
     });
   }
 
-  const token = authHeader.split(" ")[1]
-  if(token){
+  const token = authHeader.split(" ")[1];
+  if (!token) {
     return res.status(401).json({
-      message : "Unauthorized"
+      message: "Unauthorized",
     });
+  }
+
+  try{
+    const {payload} = await jwtVerify(token, JWKS)
+    console.log(payload)
+    next();
+  }
+  catch (error) {
+    return res.status(403).json({
+      message: "Forbidden"
+    })
   }
 
   
-
-  next()
 };
-
-
-
 
 async function run() {
   try {
@@ -81,17 +90,19 @@ async function run() {
     });
 
     //find one API  && middleware
-    app.get("/destination/:id",
+    app.get(
+      "/destination/:id",
       // প্রথম ফাংশন: মিডলওয়্যার (এখানে next লাগবে)
       // (req, res, next) => {
       //   const header = req.headers.authorization;
       //     console.log(header)
       //     next();
-        
+
       //   // এটি পরের async ফাংশনটিকে চালু করবে
       // },
 
-      verifyToken, async (req, res) => {
+      verifyToken,
+      async (req, res) => {
         const { id } = req.params;
         const result = await destinationCollection.findOne({
           _id: new ObjectId(id),
