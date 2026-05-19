@@ -112,7 +112,7 @@ async function run() {
     );
 
     // edit description related API
-    app.patch("/destination/:id", async (req, res) => {
+    app.patch("/destination/:id", verifyToken ,async (req, res) => {
       const { id } = req.params;
       const updatedData = req.body;
 
@@ -133,7 +133,7 @@ async function run() {
     });
 
     //for my-bookings API
-    app.get("/booking/:userId", async (req, res) => {
+    app.get("/booking/:userId", verifyToken ,async (req, res) => {
       try {
         const { userId } = req.params;
 
@@ -164,7 +164,8 @@ async function run() {
       }
     });
 
-    app.delete("/booking/:bookingId", async (req, res) => {
+    // Delete API
+    app.delete("/booking/:bookingId", verifyToken ,async (req, res) => {
       try {
         const { bookingId } = req.params;
 
