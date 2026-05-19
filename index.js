@@ -28,6 +28,31 @@ const client = new MongoClient(uri, {
   },
 });
 
+
+const verifyToken = (req, res, next) => {
+        
+  const authHeader = req?.headers.authorization
+  if(!authHeader){
+    return res.status(401).json({
+      message : "Unauthorized"
+    });
+  }
+
+  const token = authHeader.split(" ")[1]
+  if(token){
+    return res.status(401).json({
+      message : "Unauthorized"
+    });
+  }
+
+  
+
+  next()
+};
+
+
+
+
 async function run() {
   try {
     await client.connect();
@@ -58,15 +83,15 @@ async function run() {
     //find one API  && middleware
     app.get("/destination/:id",
       // প্রথম ফাংশন: মিডলওয়্যার (এখানে next লাগবে)
-      (req, res, next) => {
-        const header = req.headers.authorization;
-          console.log(header)
-          next();
+      // (req, res, next) => {
+      //   const header = req.headers.authorization;
+      //     console.log(header)
+      //     next();
         
-        // এটি পরের async ফাংশনটিকে চালু করবে
-      },
+      //   // এটি পরের async ফাংশনটিকে চালু করবে
+      // },
 
-      async (req, res) => {
+      verifyToken, async (req, res) => {
         const { id } = req.params;
         const result = await destinationCollection.findOne({
           _id: new ObjectId(id),
